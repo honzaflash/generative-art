@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="Pattern_Clock" content="width=device-width, initial-scale=1.0">
+  <title>Circle Clock</title>
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      margin: 0px;
+      padding: 0px;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      
+      font-family: Calibri, 'Gill Sans', 'Trebuchet MS', sans-serif;
+      color: rgb(173, 255, 170);
+      background: rgb(12, 12, 12);
+    }
+    main {
+      margin: 0px;
+      padding: 0px;
+      padding-bottom: auto;
+      display: flex;
+      flex-grow: 1;
+       
+      width: min-content;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-self: center;
+    }
+    section {
+      margin: 30px 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: right;
+      background: rgb(20, 20, 20);
+      box-shadow: 3px 5px 4px #000000a2;
+    }
+    p {
+      margin: 5px;
+      padding: 0px 10px;
+    }
+    table {
+      margin: 5px;
+      padding: 0px 10px;
+      text-emphasis: none;
+    }
+    th {
+      text-align: left;
+      font-weight: inherit;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.6/p5.js"></script>
+  <script src="https://cdn.rawgit.com/mourner/suncalc/master/suncalc.js"></script>
+  <script src="circle_clock.js"></script>
+</head>
+
+<body>
+  <main>
+    <div id="clock_canvas"></div>
+
+    <section>
+      <h1>Circle Clock</h1>
+      <p>This is a generative clock made in p5.js<br>
+        The <span style="color: rgb(135, 243, 238)">cyan</span> "hand" shows seconds, 
+        the <span style="color: rgb(134, 240, 102)">yellowish green</span> one minutes and
+        the <span style="color: rgb(238, 246, 122)">light yellow</span> one hours.<br>
+        Every hand moves in increments of 5° and in addition the two circles
+        in the second hand slide along its axis in directions opposit to each other
+        based on cosine of the arms angle.<br>
+        There is also a stripe that spans around from the time of
+        current day's sunset / sunrise to midnight / noon accordingly.<br>
+        And current date is shown by the pills under the clock on the bottom.
+      </p>
+      <p>
+        <h1>Controlls:</h1>
+        <table>
+          <tr>
+            <th>s</th><th>save current frame</th>
+          </tr>
+          <tr>
+            <th>m</th><th>switch between modes 1, 2, 3</th>
+          </tr>
+          <tr>
+            <th>1</th><th>set mode 1 - circle chaos background</th>
+          </tr>
+          <tr>
+            <th>2</th><th>set mode 2 - keep ghost arms (lightest blend mode)</th>
+          </tr>
+          <tr>
+            <th>3</th><th>set mode 3 - stars background</th>
+          </tr>
+          <tr>
+            <th>4</th><th>set mode 4 - control second (y axis) and minute (x axis) hands by mouse movement</th>
+          </tr>
+          <tr>
+            <th>5</th><th>set mode 5 - all hands alligned at 12 o'clock</th>
+          </tr>
+        </table>
+      </p>
+    </section>
+  </main>
+</body>
+
+</html>
