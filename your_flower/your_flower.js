@@ -1,17 +1,25 @@
 /*     ~~~ Your Flower ~~~
  * author: Jan Rychlý
  * controlls: s ... save frame
+ *            f ... freeze tracking
  *            t ... toggle webcam tracker 
  * 
  * project notes on notion:
  * https://www.notion.so/GDP-Final-Project-b452b25e336e4f348264c84f61137a7d
  */
-let size = 800;
 
-let showingTracking = true; //
+const size = 800;
+
+let showingTracking = true;
 let capture;
 let tracker;
 let positions;
+let userImage;
+let generateFlower = false;
+
+let presentationMode = false;
+
+let flower;
 
 
 /* SETUP */
@@ -28,7 +36,7 @@ function setup() {
   tracker = new clm.tracker();
   tracker.init();
   tracker.start(capture.elt);
-  
+
   frameRate(30);
 }
 
@@ -37,18 +45,31 @@ function setup() {
 function draw() {
   background(220, 40, 10);
   
-  positions = tracker.getCurrentPosition();
+  let newPositions = tracker.getCurrentPosition();
   if (showingTracking) showTracking(0.4);
-
+  if(newPositions) {
+    positions = newPositions;
+  }
   if (!positions) return;
 
-  // generate flower here
+  if (flower) {
+    translate(width / 2, height / 2);
+    flower.draw();
+  }
 }
 
 
 function showTracking(scl) {
+  push();
+
+  if (presentationMode) {
+    scale(1.25);
+    image(capture, 0, 0);
+    return;
+  }
+
   scale(scl);
-  
+
   image(capture, 0, 0);
   
   if (!positions) {
@@ -59,6 +80,8 @@ function showTracking(scl) {
     text("can't find you :(", capture.width/2, capture.height/2);
     return;
   }
+
+  // flower = new Flower(positions, capture);
 
   // face area
   beginShape();
@@ -91,6 +114,8 @@ function showTracking(scl) {
   //   fill(100, 100, 100);
   //   circle(pos[0], pos[1], 3);
   // });
+
+  pop();
 }
 
 
@@ -101,6 +126,12 @@ function keyPressed() {
   }
   if (key == 't' || key == 'T') {
     showingTracking = !showingTracking;
+  }
+  if (key == 'f' || key == 'F') {
+    flower = new Flower(positions, capture);
+  }
+  if (key == 'p' || key == 'P') {
+    presentationMode = !presentationMode;
   }
 }
 
