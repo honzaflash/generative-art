@@ -13,9 +13,9 @@ const size = 800;
 let showingTracking = true;
 let capture;
 let tracker;
-let positions;
+let pos; // positions
+let faceScale;
 let userImage;
-let generateFlower = false;
 
 let presentationMode = false;
 
@@ -38,6 +38,10 @@ function setup() {
   tracker.start(capture.elt);
 
   frameRate(30);
+
+  // testing
+  moodSlider = createSlider(0, 1, 0.5, 0.1)
+  flower = new Flower(0, 20, 5, 7, moodSlider);
 }
 
 
@@ -45,12 +49,15 @@ function setup() {
 function draw() {
   background(220, 40, 10);
   
-  let newPositions = tracker.getCurrentPosition();
-  if (showingTracking) showTracking(0.4);
-  if(newPositions) {
-    positions = newPositions;
-  }
-  if (!positions) return;
+  // let newPositions = tracker.getCurrentPosition();
+  // if(newPositions) {
+  //   pos = newPositions;
+  //   faceScale = abs(pos[1][0] - pos[13][0]) / capture.width; // TODO account for face tilt
+  // } else {
+    
+  // }
+  // if (showingTracking) showTracking(0.4);
+  // if (!pos) return;
 
   if (flower) {
     translate(width / 2, height / 2);
@@ -72,7 +79,7 @@ function showTracking(scl) {
 
   image(capture, 0, 0);
   
-  if (!positions) {
+  if (!pos) {
     fill(100, 100, 85, 60);
     noStroke();
     textAlign(CENTER, CENTER);
@@ -81,17 +88,15 @@ function showTracking(scl) {
     return;
   }
 
-  // flower = new Flower(positions, capture);
-
   // face area
   beginShape();
   fill(100, 100, 100, 30);
   stroke(100, 100, 100);
   for (let i = 0; i < 19; i++) {
-    vertex(positions[i][0], positions[i][1]);
+    vertex(pos[i][0], pos[i][1]);
   }
   for (let i = 22; i >= 19; i--) {
-    vertex(positions[i][0], positions[i][1]);
+    vertex(pos[i][0], pos[i][1]);
   }
   endShape(CLOSE);
 
@@ -101,13 +106,13 @@ function showTracking(scl) {
   fill(50, 100, 100, 30);
   stroke(50, 100, 10);
   mouthPts.forEach(pt => {
-    vertex(positions[pt][0], positions[pt][1]);
+    vertex(pos[pt][0], pos[pt][1]);
   });
   endShape(CLOSE);
 
-  // eyeballs
-  circle(positions[27][0], positions[27][1], positions[24][1] - positions[26][1]);
-  circle(positions[32][0], positions[32][1], positions[31][1] - positions[29][1]);
+  // pupils
+  circle(pos[27][0], pos[27][1], pos[24][1] - pos[26][1]);
+  circle(pos[32][0], pos[32][1], pos[31][1] - pos[29][1]);
 
   // all points
   // positions.forEach(pos => {
@@ -122,13 +127,13 @@ function showTracking(scl) {
 
 function keyPressed() {
   if (key == 's' || key == 'S') {
-    saveCanvas('patern_clock.png');
+    saveCanvas('my_flower.png');
   }
   if (key == 't' || key == 'T') {
     showingTracking = !showingTracking;
   }
   if (key == 'f' || key == 'F') {
-    flower = new Flower(positions, capture);
+    flower = new Flower(0, 10, 5, 7, 0.5);
   }
   if (key == 'p' || key == 'P') {
     presentationMode = !presentationMode;
