@@ -47,7 +47,7 @@ function setup() {
 
 /* DRAW */
 function draw() {
-  background(220, 40, 10);
+  background(0);
   
   // let newPositions = tracker.getCurrentPosition();
   // if(newPositions) {
@@ -113,12 +113,6 @@ function showTracking(scl) {
   // pupils
   circle(pos[27][0], pos[27][1], pos[24][1] - pos[26][1]);
   circle(pos[32][0], pos[32][1], pos[31][1] - pos[29][1]);
-
-  // all points
-  // positions.forEach(pos => {
-  //   fill(100, 100, 100);
-  //   circle(pos[0], pos[1], 3);
-  // });
 
   pop();
 }

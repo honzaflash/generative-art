@@ -47,7 +47,6 @@ class Rose {
         this.layerCount = Math.floor(random(rComb[comb].lc.lo, rComb[comb].lc.up)); // PARAM
         this.vertexJitter = random(rComb[comb].vj.lo, rComb[comb].vj.up); // PARAM
         this.layerIndependancy = random(rComb[comb].li.lo, rComb[comb].li.up); // PARAM
-        console.log('layers:', this.layerCount);
         
         this.lerpFromHue = random(0, 360); // PARAM
         this.lerpToHue = this.lerpFromHue + random(30, 80); // PARAM;
@@ -75,99 +74,111 @@ class Rose {
     }
 };
 
+const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
+                59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
+                127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179];
+
 class MaurerRose {
-    // TODO https://www.youtube.com/watch?v=4uU9lZ-HSqA
     constructor() {
+        this.n = Math.floor(random(0, 90)) * 2;
+        this.d = random(primes);
     }
-};
+
+    draw() {
+        fill(40, 20, 100, 90);
+        stroke(30, 90, 100, 80);
+        // maurerOutline(this.n);
+        
+        noFill()
+        stroke(50, 90, 97, 90);
+        maurer(this.n, this.d);
+      }
+}
+
 
 class Daisy {
     constructor(pointCount, seed1, seed2, mood) {
-        this.crown = new DaisyLayer();
+        this.petalCount = pointCount;
+        this.petalLength = width * 0.4;
+        this.petalWidth = 30;
+        this.petalJagged = random([false, true]);
+        this.petalColor = color(random(0, 360), 90, 98);
     }
     
     draw() {
-        this.crown.draw();
+        push()
+
+        noStroke();
+        fill(this.petalColor);
+        for (let i = 0; i < this.petalCount; i++) {
+            drawPetal(this.petalLength, this.petalWidth, this.petalJagged, 0.5, i);
+            rotate(TWO_PI/this.petalCount);
+        }
+        // ellipse(0, 0, width * 0.15);
+        
+        pop()
     }
 };
 
 
 const flowerConsturctors = [
     Rose,
-    Daisy,
-    Rose
-    // (lerpFrom, lerpTo, levelCount, vertexCount) => { return Rose(false, lerpFrom, lerpTo, levelCount, vertexCount) },
-    // (lerpFrom, lerpTo, levelCount, vertexCount) => { return Rose(true, lerpFrom, lerpTo, levelCount, vertexCount) },
-    // (levelCount) => { return Daisy(false, levelCount)},
-    // (levelCount) => { return Daisy(true, levelCount)}
+    MaurerRose,
+    Daisy
 ]
 
 
-class FlowerCrownLayer {
-    constructor(level, maxLevel) {
-        this.maxLevel = maxLevel;
-        this.level = level;
-        this.crownDraw = undefined;
-        this.subCrown = undefined;
+function drawPetal(length, pWidth, jagged, jitter, i) {
+    const nr = 1; // noise rez
+    beginShape();
+    curveVertex( pWidth * 3, 0);
+    curveVertex( 0, 0);
+    curveVertex(-pWidth, length/2 * noiseJitter(0.75, 420 + i * nr, 0)); // side
+    curveVertex(-pWidth * 0.4, length * noiseJitter(0.25, 420 + i * nr, 1)); // tip
+    if (jagged) {
+        curveVertex( 0, length * noiseJitter(0.25, 420 + i * nr, 2));
     }
-    draw() {
-        this.crownDraw();
-        if (this.subCrown) {
-            this.subCrown.draw();
-        }
+    curveVertex( pWidth * 0.4, length * noiseJitter(0.25, 420 + i * nr, 3)); // tip
+    curveVertex( pWidth, length/2 * noiseJitter(0.75, 420 + i * nr, 4)); // side
+    curveVertex( 0, 0);
+    curveVertex(-pWidth * 3, 0);
+    endShape();
+}
+
+
+function noiseJitter(strength, a, b) {
+    return 1 + (noise(a, b) - 0.5) * strength/2;
+}
+
+
+// Used refference by: The Coding Train / Daniel Shiffman
+//  - https://editor.p5js.org/codingtrain/sketches/qa7RiptE9
+function maurer(n, d) {
+    beginShape();
+    strokeWeight(1);
+    for (let i = 0; i <= TWO_PI; i += TWO_PI/360) {
+        let r = width * 0.4 * sin(n * i * d);
+        let x = r * cos(i * d);
+        let y = r * sin(i * d);
+        vertex(x,y);    
     }
-};
+    endShape();
+}
 
-
-class DaisyLayer extends FlowerCrownLayer {
-    constructor(level, maxLevel) {
-        super(level, maxLevel);
-        console.log(level, maxLevel);
-
-        this.color = color(random(0,360), 75, 98, 50);
-
-        let counts = [32, 20, 16, 10, 8];
-        let c = Math.floor(random(0, 1.5 - this.level / this.maxLevel) / 1.5 * counts.length);
-        this.leafCount = counts[c];
-        this.leafWidth = random(15, 40);
-        this.leafRotOffset = random([true, false]);
-
-        this.crownDraw = () => {
-            fill(this.color);
-            leafFan(250 * this.level/this.maxLevel, this.leafCount, this.leafWidth, this.leafRotOffset);
-        }
-
-        this.subCrown = level > 1 ? new DaisyLayer(level - 1, maxLevel) : undefined;
+function maurerOutline(n) {
+    strokeWeight(3);
+    beginShape();
+    for (let i = 0; i <= TWO_PI; i += TWO_PI/360) {
+        let r = width * 0.4 * sin(n * i);
+        let x = r * cos(i);
+        let y = r * sin(i);
+        vertex(x,y);    
     }
-};
+    endShape();
+}
 
 
-class Center {
-    constructor() {
-        this.color = color(random(0, 360), 75, 80);
-        // this.dotsColor = random([undefined, color(random(0, 360), 75, 80)]);
-        // this.secondLayer = random([undefined, color(random(0, 360), 75, 80)]);
-    }
-    draw() {
-        // if (this.secondLayer) {
-        //     fill(this.secondLayer)
-        //     wigglyCircle(28, 15, 3, 10);
-        // }
-        fill(this.color);
-        circle(0, 0, 50);
-        // if (this.dotsColor) {
-        //     stroke(this.dotsColor);
-        //     strokeWeight(3);
-        //     for (let i = 0; i < 20; i++) {
-        //         point((noise(i) - 0.5) * 40, (noise(i * 42) - 0.5) * 40);
-        //     }
-        //     noStroke();
-        // }
-    }
-};
-
-
-function wigglyCircle(r, vertC, noiseRes, jitterStrength) {
+function wigglyCircle(r, vertC, noiseRes, jitterRange) {
     beginShape();
     // drawing 3 extra vertices to smoothly close up the curve
     for (let angle = 0; angle < vertC + 3; angle++) {
@@ -175,24 +186,12 @@ function wigglyCircle(r, vertC, noiseRes, jitterStrength) {
         let curSin = sin(angle * TWO_PI / vertC);
         let jitter = (noise(1000 + curCos * r * noiseRes,
                             1000 + curSin * r * noiseRes)
-                      - 0.5) * jitterStrength;
+                      - 0.5) * jitterRange;
         let x = (r + jitter) * curCos;
         let y = (r + jitter) * curSin;
         curveVertex(x, y);
     }
     endShape();
-}
-
-function leafFan(r, leafC, leafWidth, rotOffset, noiseRes, amplitude) {
-    push();
-    if (rotOffset) {
-        rotate(TWO_PI / leafC / 2);
-    }
-    for (let i = 0; i < leafC; i++) {
-        ellipse(0, r / 2, leafWidth, r * (0.9 + noise(42 * i) * 0.2));
-        rotate(TWO_PI / leafC);
-    }
-    pop();
 }
 
 
