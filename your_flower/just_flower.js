@@ -8,54 +8,54 @@
 const size = 800;
 
 let flower;
-let kind = 2;
+let kind = 1;
 let moodSlider;
 let flowerKindButton;
 
 /* SETUP */
 function setup() {
-  createCanvas(size, size).parent('flower_canvas');
+    createCanvas(size, size).parent('flower_canvas');
 
-  colorMode(HSB, 360, 100, 100, 100);
-  noStroke();
+    colorMode(HSB, 360, 100, 100, 100);
+    noStroke();
 
-  flowerKindButton = createButton('kind: ' + kind).mousePressed(() => {
-    kind = (kind + 1) % 3;
+    flowerKindButton = createButton('kind: ' + kind).mousePressed(() => {
+        kind = (kind + 1) % 3;
+        genNewFlower();
+        flowerKindButton.elt.firstChild.nodeValue = 'kind: ' + kind;
+    });
+
+    createButton('Anotha one').mousePressed(() => {
+        genNewFlower();
+    })
+
+    moodSlider = createSlider(0, 1, 0.5, 0.05);
+
     genNewFlower();
-    flowerKindButton.elt.firstChild.nodeValue = 'kind: ' + kind;
-  });
 
-  createButton('Anotha one').mousePressed(() => {
-    genNewFlower();
-  })
-
-  moodSlider = createSlider(0, 1, 0.5, 0.05);
-
-  genNewFlower();
-
-  frameRate(30);
+    frameRate(10);
 }
 
 
 /* DRAW */
 function draw() {
-  background(0);
+    background(0);
 
-  if (flower) {
-    translate(width / 2, height / 2);
-    flower.draw();
-  }
+    if (flower) {
+        translate(width / 2, height / 2);
+        flower.draw();
+    }
 }
 
 
 function genNewFlower() {
-  noiseSeed(frameCount);
-  flower = new Flower(kind, 12, 42, 42, moodSlider);
+    randomSeed(frameCount * 42 + Date.now());
+    flower = new Flower(kind, random(10000), random(10000), random(10000), moodSlider);
 }
 
 function keyPressed() {
-  if (key == 's' || key == 'S') {
-    saveCanvas('just_a_flower_.png');
-  }
+    if (key == 's' || key == 'S') {
+        saveCanvas('just_a_flower_.png');
+    }
 }
 
