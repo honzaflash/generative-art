@@ -39,10 +39,6 @@ class Flower {
  * |    ~~ ROSE related structures ~~    |
  * --------------------------------------- */
 
-// polynomials for saturation and brightness realative to the current layer and current 'mood'
-function satPol(l, m, c) {return -2 * Math.pow(m - 0.55, 4) -0.4 * Math.pow(m - 0.55, 2) * 0.2 * Math.pow(l - 0.3, 5) + c;}
-function briPol(l, m, c) {return 0.4 * m * Math.pow(l, 3) + 0.6 * l + c;}
-
 // Rose parameter combination limits
 function parLims(vertexCountLim, layerCountLim, vertexJitterLim, layerIndependancyLim) {
     return {
@@ -67,27 +63,31 @@ class Rose {
         const comb = Math.floor((seed1 / 10) % rComb.length);
         randomSeed(seed2);
         this.vertexCount = Math.floor(random(rComb[comb].vc.lo, rComb[comb].vc.up));
+        // how many points is the curve of one layer made out of 
         this.layerCount = Math.floor(random(rComb[comb].lc.lo, rComb[comb].lc.up));
+        // how many layers of the wiggly circles the rose has
         this.vertexJitter = random(rComb[comb].vj.lo, rComb[comb].vj.up);
+        // is used as the range of jitter in fractions of 'width' 
         this.layerIndependancy = random(rComb[comb].li.lo, rComb[comb].li.up);
+        // is used as the noise resolution
         
         randomSeed(seed0);
         this.lerpFromHue = random(0, 360);
         this.lerpToHue = this.lerpFromHue + random(30, 80);
+
         this.mood = mood;
     }
     
     draw() {
-
         noStroke()
         // l in <layerCount, layerCount - 1, ..., 1>
         for (let l = this.layerCount; l > 0; l--) {
             let layerProgress = l / this.layerCount;
             fill(lerpHue(this.lerpFromHue, this.lerpToHue, layerProgress),
-                 satPol(layerProgress, this.mood.value(), 0.97) * 100,
-                 briPol(layerProgress, this.mood.value(), 0.1) * 100);
+                 100 - Math.pow(layerProgress, 4) * 20 * Math.pow(this.mood.value(), 2),
+                 10 + layerProgress * 85 + Math.pow(layerProgress, 3) * this.mood.value() * 10);
             wigglyCircle(width * 0.35 * layerProgress,
-                         this.vertexCount, this.layerIndependancy,
+                         this.vertexCount, this.layerIndependancy + this.mood.value() * 0.0005,
                          this.vertexJitter * (layerProgress * 3/4 + 1/4) * width * 0.4);
         }
     }
@@ -117,20 +117,21 @@ function wigglyCircle(r, vertC, noiseRes, jitterRange) {
  * --------------------------------------- */
 
 // at least 4, not a prime, some other numbers are not included
-const maurerNs = [4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24,
-                  25, 26, 27, 28, 30, 32, 33, 34, 35, 36, 38, 39, 40, 42,
-                  44, 45, 46, 48, 49, 50, 51, 52, 54, 55, 56, 60, 63,
-                  64, 65, 66, 68, 69, 70, 72, 75, 76, 77, 78, 80, 81, 84,
-                  85, 88, 92, 95, 96, 98, 99, 100, 102, 104, 105, 108,
-                  110, 112, 114, 125, 126, 128, 130, 132, 133,
+const maurerNs = [4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 24,
+                  25, 26, 27, 28, 30, 32, 34, 35, 36, 38, 39, 40, 42,
+                  44, 45, 46, 48, 49, 50, 52, 54, 56,
+                  64, 65, 66, 68, 70, 72, 75, 76, 77, 78, 80, 81, 84,
+                  85, 88, 92, 96, 98, 99, 100, 102, 104, 105, 108,
+                  110, 112, 125, 126, 128, 130, 132, 133,
                   135, 136, 138, 140, 143, 144, 147, 150, 152, 153, 154,
-                  156, 160, 161, 162, 165, 168, 169, 170, 171, 175, 176];
-                  // potential blacklist: 69, 55, 169, 21, 114, 51
+                  156, 160, 161, 162, 165, 168, 170, 171, 175, 176];
+                  // potential blacklist: 
+
 // at least 11 and less than 163, pretty much primes only, some are not included
 const maurerDs = [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
-                  59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107,
-                  109, 113, 121, 127, 131, 139, 149, 151, 157];
-                  // potential blacklist: 83, 41, 97, 131, 127, 79
+                  59, 61, 67, 71, 73, 89, 101, 103, 107,
+                  109, 113, 121, 139, 149, 151, 157];
+                  // potential blacklist: 41
 
 
 /** Class representing a Maurer rose */
@@ -139,26 +140,34 @@ class MaurerRose {
         // this.n = createSlider(0, maurerNs.length - 1, 0, 1);
         // this.d = createSlider(0, maurerDs.length - 1, 5, 1);
         // this.showND = createP('nd');
-        // this.showND.style('color', 'white');
-        this.n = maurerNs[Math.floor(seed1 % maurerNs.length)];
-        this.d = maurerDs[Math.floor(seed2 % maurerDs.length)];
+        randomSeed(seed1);
+        this.n = maurerNs[Math.floor(abs(randomGaussian(0, maurerNs.length / 2))) % maurerNs.length];
+        randomSeed(seed2);
+        this.d = maurerDs[Math.floor(abs(randomGaussian(0, maurerDs.length / 2))) % maurerDs.length];
+
         randomSeed(seed0);
-        this.color = color(random(0, 360), 70, 100);
+        this.hue = random(0, 360);
+
         this.mood = mood;
 
-        console.log('maurer - n: ' + this.n + ', d: ' + this.d);
+        console.log('current maurer - n: ' + this.n + ', d: ' + this.d);
     }
 
     draw() {
-        fill(hue(this.color), 60, 100, 30);
+        push();
+        scale(1 + this.mood.value() * 0.03);
+
+        fill(this.hue, 60, 100, 25 + 10 * this.mood.value());
         noStroke();
         maurerBackground(this.n);
         
         noFill();
-        stroke(this.color);
+        stroke(this.hue, 70 - Math.pow(this.mood.value(), 2) * 10, 100);
         // maurer(maurerNs[this.n.value()], maurerDs[this.d.value()]);
         // this.showND.elt.innerText = 'n: ' + maurerNs[this.n.value()] + ', d: ' + maurerDs[this.d.value()];
         maurer(this.n, this.d);
+
+        pop();
     }
 }
 
@@ -167,10 +176,10 @@ class MaurerRose {
 // Refference by: The Coding Train / Daniel Shiffman
 //  - https://editor.p5js.org/codingtrain/sketches/qa7RiptE9
 function maurer(n, d) {
-    beginShape();
     strokeWeight(1);
+    beginShape();
     for (let i = 0; i <= TWO_PI; i += TWO_PI/360) {
-        let r = width * 0.4 * sin(n * i * d);
+        let r = width * 0.35 * sin(n * i * d);
         let x = r * cos(i * d);
         let y = r * sin(i * d);
         vertex(x,y);    
@@ -185,7 +194,7 @@ function rainbowMaurer(n, d) {
     let prevY = 0;
     strokeWeight(1);
     for (let i = 1; i <= TWO_PI; i += TWO_PI/360) {
-        let r = width * 0.4 * sin(n * i * d);
+        let r = width * 0.35 * sin(n * i * d);
         let x = r * cos(i * d);
         let y = r * sin(i * d);
         stroke(i * 6, 70, 100);
@@ -201,7 +210,7 @@ function maurerBackground(n) {
     strokeWeight(3);
     beginShape();
     for (let i = 0; i <= TWO_PI; i += TWO_PI/360) {
-        let r = width * 0.4 * sin(n * i);
+        let r = width * 0.35 * sin(n * i);
         let x = r * cos(i);
         let y = r * sin(i);
         vertex(x,y);    
@@ -219,15 +228,19 @@ function maurerBackground(n) {
 class Daisy {
     constructor(seed0, seed1, seed2, mood) {
         this.petalCount = Math.floor(seed1 % 16) + 7;
-        this.petalLength = width * 0.4;
-        this.petalWidth = 30; // TODO lower petal count --> wider petals
+        this.petalLength = width * 0.35;
+        seed2 = abs(seed2);
+        this.petalWidth = 25 + Math.floor(seed2 % 20); // TODO lower petal count --> wider petals
         this.petalJagged = (seed2 % 10 < 5);
-        this.layerCount = [1, 4, 5, 6][Math.floor((seed2 / 10) % 4)];
+        console.log(Math.floor((seed2 / 10) % 4) % 4);
+        this.layerCount = [1, 4, 6][Math.floor((seed2 / 10) % 3) % 3];
         this.layers = [];
 
         randomSeed(seed0);
         this.lerpFromHue = random(0, 360); // PARAM
         this.lerpToHue = this.lerpFromHue + random(20, 70); // PARAM;
+        
+        this.mood = mood;
 
         if (this.layerCount == 1) {
             // single petal layer regular daisy
@@ -240,7 +253,7 @@ class Daisy {
                 this.petalJagged,
                 this.lerpFromHue,
                 this.lerpToHue,
-                (x) => {return map(x, 0, 1, 80, 97);}
+                (x) => {return map(x, 0, 1, 80, 88) + Math.pow(this.mood.value(), 2) * 12 ;}
                 ));
         // maybe TODO else if (...) {randomly spread petals (uneven noise based rotation)}
         } else {
@@ -255,9 +268,10 @@ class Daisy {
                     this.petalJagged,
                     this.lerpFromHue + i * 5,
                     null,
-                    (x) => {return map(x, 0, 1, 50, 100);}
+                    (x) => {return map(x, 0, 1, 50, 90) + x * this.mood.value() * 10;}
                     ));
             }
+            // this.center = new Center(); TODO
         }
     }
 
@@ -265,7 +279,16 @@ class Daisy {
         this.layers.forEach((layer) => {
             layer.draw();
         });
-        // maybe TODO draw center
+        let centerR;
+        if (this.layerCount == 1) {
+            centerR = width * 0.04 + Math.pow(this.petalCount / 21, 2) * width * 0.16;
+        } else {
+            centerR = width * 0.02 + Math.pow(this.petalCount / 21, 2) * width * 0.12;
+        }
+        for (let i = 20; i > 0; i--) {
+            fill(this.lerpFromHue, 90 + i * 0.5, 98 - Math.pow(i, 2) / 15);
+            circle(0, 0, centerR * i / 20);
+        }
     }
 }
 
@@ -294,15 +317,18 @@ class DaisyLayer {
             rotate(TWO_PI / this.petalCount / 2);
         }
         let curHue = this.lerpFromHue;
-        for (let p = 0; p < this.petalCount; p++) {
-            for (let i = this.gradientRez; i > 0; i--) {
+        for (let i = this.gradientRez; i > 0; i--) {
+            for (let p = 0; p < this.petalCount; p++) {
+                let layerProgress = i / this.gradientRez;
                 if (this.lerpToHue) {
-                    curHue = lerpHue(this.lerpFromHue, this.lerpToHue, i / this.gradientRez);
+                    curHue = lerpHue(this.lerpFromHue, this.lerpToHue, layerProgress);
                 }
-                fill(curHue, 90, this.brightnessMap(i / this.gradientRez));
-                drawPetal(this.petalLength * ((i + 0) / (this.gradientRez + 0)), this.petalWidth * ((i + 5) / (this.gradientRez + 5)), this.petalJagged, 0.5, p);
+                fill(curHue, 90, this.brightnessMap(layerProgress));
+                drawPetal(this.petalLength * layerProgress * (Math.pow(this.mood.value(), 2) * 0.05 + 1),
+                          this.petalWidth * (layerProgress + 0.2) / 1.2,
+                          this.petalJagged, 0.5, p);
+                rotate(TWO_PI/this.petalCount);
             }
-            rotate(TWO_PI/this.petalCount);
         }
 
         pop();

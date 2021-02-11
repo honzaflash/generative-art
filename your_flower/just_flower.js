@@ -8,7 +8,7 @@
 const size = 800;
 
 let flower;
-let kind = 1;
+let kind = 0;
 let moodSlider;
 let flowerKindButton;
 
@@ -29,7 +29,7 @@ function setup() {
         genNewFlower();
     })
 
-    moodSlider = createSlider(0, 1, 0.5, 0.05);
+    moodSlider = createSlider(0, 1, 0.3, 0.05);
 
     genNewFlower();
 

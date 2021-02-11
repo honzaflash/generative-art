@@ -15,11 +15,14 @@ let tracker;
 let pos; // positions
 let analysis; // more accurate face landmark data
 // received on demand from the Face++ API when 'g' is pressed
+let img; // the frame when 'g' is pressed
 
 let showingTracking = true;
+let updateMood = true;
 
 let flower;
 
+let userMood;
 let moodSlider;
 
 
@@ -31,19 +34,17 @@ function setup() {
     noStroke();
 
     capture = createCapture(VIDEO);
-    // capture.size(640, 480);
-    // This actually throws an error but the tracker doesn't work without this call :thinking: >:(
+    capture.elt.onloadedmetadata = () => {
+        tracker = new clm.tracker();
+        tracker.init();
+        tracker.start(capture.elt);
+    }
     capture.hide();
-
-    tracker = new clm.tracker();
-    tracker.init();
-    tracker.start(capture.elt);
 
     frameRate(30);
 
-    // testing
-    moodSlider = createSlider(0, 1, 0.5, 0.1)
-    flower = new Flower(0, 20, 5, 7, moodSlider);
+    moodSlider = createSlider(0, 1, 0.5, 0.1);
+    userMood = new Mood();
 }
 
 
@@ -51,33 +52,45 @@ function setup() {
 function draw() {
     background(0);
     
+    if (!tracker) {
+        return;
+    }
+
     let newPositions = tracker.getCurrentPosition();
     if(newPositions) {
         pos = newPositions;
+        if (updateMood) {
+            userMood.update();
+        }
     }
     
     if (showingTracking) {
-        showTracking(1);
+        showTracking(0.3);
     }
 
-    if (flower) {
-        // translate(width / 2, height / 2);
-        //flower.draw();
-    }
-
-    scale(1.3);
-    if (analysis) {
-        Object.values(analysis.faces[0].landmark).forEach((l) => {
-            fill(170, 70, 100);
-            circle(l.x, l.y, 3);
-        });
+    translate(width / 2, height / 2);
+    textAlign(CENTER);
+    fill(70, 95, 95);
+    noStroke();
+    textSize(width * 0.03);
+    if (typeof(flower) == "string") {
+        text(flower, 0, width * 0.05);
+        let a = frameCount / 3;
+        noFill();
+        stroke(70, 95, 95);
+        strokeWeight(3);
+        arc(0, -width * 0.07, width * 0.1, width * 0.1, a, a + TWO_PI * 0.8, OPEN);
+    } else if (flower) {
+        flower.draw();
+    } else {
+        text("Press 'G' to generate your flower", 0, 0);
     }
 }
 
 
 // generate a new flower (changing the global flower variable)
 async function genNewFlower() {
-    
+    flower = "waiting for tracking data";
     // uses the global 'feceDetectForm' to send a request for face analysis
     // to Face++ API and then uses the received data to construct a new Flower
     async function fetchDetectionAndGenerate() {
@@ -85,25 +98,73 @@ async function genNewFlower() {
                             { method: "POST", body: faceDetectForm });
 
         analysis = await resp.json();
-        console.log(analysis);
+        console.log("Tracking data: ", analysis.faces[0]);
 
-        noiseSeed(frameCount);
-        flower = new Flower(0, 12, 42, 42, moodSlider);
+        let {kind, seed0, seed1, seed2} = processFaceData(analysis.faces[0]);
+        flower = new Flower(kind, seed0, seed1, seed2, userMood);
     }
 
-    let canv = document.createElement('canvas');
+    img = document.createElement('canvas');
     // canv.style.display = 'none';
-    canv.width = 640;
-    canv.height = 480;
+    img.width = 640;
+    img.height = 480;
     const video = capture.elt;
-    canv.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-    // document.body.appendChild(canv);
-    canv.toBlob((blob) => {
+    img.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+    // document.body.appendChild(img);
+    img.toBlob((blob) => {
         faceDetectForm.set("image_file", blob, "capture.png");
         console.log(faceDetectForm.get("image_file").size);
 
         fetchDetectionAndGenerate();
     }); // get the image blob and call the async generation
+}
+
+
+function processFaceData({attributes, landmark}) {
+    const genderbeauty = Math.floor(attributes.gender.value.charCodeAt(0) * 11 + attributes.beauty.male_score * 17 + attributes.beauty.female_score * 19);
+    let kind = genderbeauty % 3;
+    const anchor = createVector(landmark.contour_chin.x, landmark.contour_chin.y);
+    const l_cheek = createVector(landmark.contour_left4.x, landmark.contour_left4.y);
+    const r_cheek = createVector(landmark.contour_right4.x, landmark.contour_right4.y);
+    const l_eye = createVector(landmark.left_eye_center.x, landmark.left_eye_center.y);
+    const r_eye = createVector(landmark.right_eye_center.x, landmark.right_eye_center.y);
+    const l_nose = createVector(landmark.nose_left.x, landmark.nose_left.y);
+    const r_nose = createVector(landmark.nose_right.x, landmark.nose_right.y);
+
+    let seed0 = genderbeauty * 11 + (anchor.x - l_cheek.x) * 17 + (anchor.y - l_cheek.y) * 17;
+    let seed1 = attributes.age.value * 11 + attributes.skinstatus.health * 170 + l_eye.x * 19 + l_eye.y * 19;
+    let seed2 = (l_nose.x - r_nose.x) * 170 + attributes.age.value * 19;
+    return {'kind': kind, 'seed0': seed0, 'seed1': seed1, 'seed2': seed2};
+}
+
+
+class Mood {
+    constructor() {
+        this.val = 0.2;
+        this.curr;
+        this.adjustSpeed = 0.3;
+    }
+    getCurrent() {
+        let rBrow = createVector(pos[17][0], pos[17][1]).sub(createVector(pos[26][0], pos[26][1]));
+        // bottom of the right eye
+        let lBrow = createVector(pos[21][0], pos[21][1]).sub(createVector(pos[31][0], pos[31][1]));
+        // bottom of the left eye
+        let curr = (rBrow.mag() + lBrow.mag()) / 2; // current absolte eyebrow height
+        let ref = createVector(pos[23][0], pos[23][1]).sub(createVector(pos[28][0], pos[28][1])).mag();
+        // reference measurement - from eye to eye
+        const c1 = 0.68; // baseline ratio of 'curr' and 'ref' for normal eyebrow height
+        const c2 = 12; // normalization constant
+        this.curr = (curr / ref - c1) * c2;
+    }
+    update() {
+        this.getCurrent();
+        this.val += (this.curr - this.val) * this.adjustSpeed;
+        if (this.val < 0) { this.val = 0; }
+        if (this.val > 1) { this.val = 1; }
+    }
+    value() {
+        return this.val;
+    }
 }
 
 
@@ -127,6 +188,7 @@ function showTracking(scl) {
         return;
     }
 
+    strokeWeight(2);
     // face area
     beginShape();
     fill(100, 100, 100, 30);
@@ -141,7 +203,7 @@ function showTracking(scl) {
 
     // mouth area
     beginShape();
-    let mouthPts = [44, 56, 57, 58, 50, 59, 60, 61];
+    const mouthPts = [44, 56, 57, 58, 50, 59, 60, 61];
     fill(50, 100, 100, 30);
     stroke(50, 100, 10);
     mouthPts.forEach(pt => {
@@ -153,6 +215,19 @@ function showTracking(scl) {
     circle(pos[27][0], pos[27][1], pos[24][1] - pos[26][1]);
     circle(pos[32][0], pos[32][1], pos[31][1] - pos[29][1]);
 
+    // eyebrows
+    const brows = [[19, 20, 21, 22], [15, 16, 17, 18]];
+    brows.forEach(brow => {
+        beginShape();
+        noFill();
+        stroke(50, 100, 100, 50);
+        strokeWeight(7);
+        brow.forEach(pt =>{
+            vertex(pos[pt][0], pos[pt][1]);
+        });
+        endShape();
+    });
+
     pop();
 }
 
@@ -163,6 +238,12 @@ function keyPressed() {
     }
     if (key == 't' || key == 'T') {
         showingTracking = !showingTracking;
+    }
+    if (key == 'm' || key == 'M') {
+        updateMood = !updateMood;
+        if (!updateMood) {
+            userMood.val = 0.2;
+        }
     }
     if (key == 'g' || key == 'G') {
         genNewFlower();
