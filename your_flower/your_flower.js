@@ -23,8 +23,6 @@ let updateMood = true;
 let flower;
 
 let userMood;
-let moodSlider;
-
 
 /* SETUP */
 function setup() {
@@ -43,7 +41,6 @@ function setup() {
 
     frameRate(30);
 
-    moodSlider = createSlider(0, 1, 0.5, 0.1);
     userMood = new Mood();
 }
 
@@ -121,19 +118,34 @@ async function genNewFlower() {
 
 
 function processFaceData({attributes, landmark}) {
-    const genderbeauty = Math.floor(attributes.gender.value.charCodeAt(0) * 11 + attributes.beauty.male_score * 17 + attributes.beauty.female_score * 19);
-    let kind = genderbeauty % 3;
-    const anchor = createVector(landmark.contour_chin.x, landmark.contour_chin.y);
-    const l_cheek = createVector(landmark.contour_left4.x, landmark.contour_left4.y);
-    const r_cheek = createVector(landmark.contour_right4.x, landmark.contour_right4.y);
-    const l_eye = createVector(landmark.left_eye_center.x, landmark.left_eye_center.y);
-    const r_eye = createVector(landmark.right_eye_center.x, landmark.right_eye_center.y);
-    const l_nose = createVector(landmark.nose_left.x, landmark.nose_left.y);
-    const r_nose = createVector(landmark.nose_right.x, landmark.nose_right.y);
+    // this could / should be improved
 
-    let seed0 = genderbeauty * 11 + (anchor.x - l_cheek.x) * 17 + (anchor.y - l_cheek.y) * 17;
+    let glasses = attributes.eyestatus.left_eye_status.no_glass_eye_close + attributes.eyestatus.left_eye_status.no_glass_eye_open < attributes.eyestatus.left_eye_status.normal_glass_eye_close + attributes.eyestatus.left_eye_status.normal_glass_eye_open;
+    glasses = int(glasses) * 41 + int(attributes.eyestatus.left_eye_status.dark_glasses > 0.6) * 83;
+    const genderbeautyglasses = Math.floor(attributes.gender.value.charCodeAt(0) * 11 +
+                                    attributes.beauty.male_score * 17 +
+                                    attributes.beauty.female_score * 19 +
+                                    glasses * 31);
+    
+    let kind = Math.floor(genderbeautyglasses / 700) % 3;
+    let anchor = createVector(landmark.contour_chin.x, landmark.contour_chin.y);
+    let l_cheek = createVector(landmark.contour_left4.x, landmark.contour_left4.y);
+    let r_cheek = createVector(landmark.contour_right4.x, landmark.contour_right4.y);
+    let l_eye = createVector(landmark.left_eye_center.x, landmark.left_eye_center.y);
+    let r_eye = createVector(landmark.right_eye_center.x, landmark.right_eye_center.y);
+    let nose_l = createVector(landmark.nose_left.x, landmark.nose_left.y);
+    let nose_r = createVector(landmark.nose_right.x, landmark.nose_right.y);
+
+    l_cheek.sub(anchor);
+    r_cheek.sub(anchor);
+    l_eye.sub(anchor);
+    r_eye.sub(anchor);
+    nose_l.sub(anchor);
+    nose_r.sub(anchor);
+
+    let seed0 = genderbeautyglasses * 11 + l_cheek.mag() * 41 + r_cheek.mag() * 41;
     let seed1 = attributes.age.value * 11 + attributes.skinstatus.health * 170 + l_eye.x * 19 + l_eye.y * 19;
-    let seed2 = (l_nose.x - r_nose.x) * 170 + attributes.age.value * 19;
+    let seed2 = nose_l.mag() * 170 + nose_r.mag() * 170 + attributes.age.value * 19;
     return {'kind': kind, 'seed0': seed0, 'seed1': seed1, 'seed2': seed2};
 }
 

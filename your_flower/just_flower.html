@@ -5,45 +5,10 @@
   <meta charset="utf-8">
   <meta name="Pattern_Clock" content="width=device-width, initial-scale=1.0">
   <title>Your Flower</title>
-  <style>
-    body {
-      margin: 0px;
-      padding: 0px;
-      display: block;
-      justify-content: center;
 
-      font-family: Calibri, 'Gill Sans', 'Trebuchet MS', sans-serif;
-      background: rgb(54, 65, 89);
-    }
-    header {
-      margin: 0px;
-      padding: 0px;
-      display: flex;
-      justify-content: center;
+  <link href="allstyle.css" rel="stylesheet">
 
-      font-size: 40px;
-      font-weight: bold;
-      font-stretch: expanded;
-      color:rgb(107, 118, 143);
-    }
-    h3 {
-      margin: 0px;
-      padding: 0px;
-      display: flex;
-      justify-content: center;
-
-      color: rgb(107, 118, 143);
-      font-weight: lighter;
-    }
-    div {
-      margin: 0px;
-      padding: 0px;
-      display: flex;
-      justify-content: center;
-    }
-
-  </style>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
   <script src="just_flower.js"></script>
   <script src="flower.js"></script>
@@ -52,9 +17,18 @@
 <body>
   <main>
     <header>Just Flower</header>
-    <div id="flower_canvas">
-    </div>
-    <h3>personalized flower just for you ❤</h3>
+    <section>
+      <div id="flower_canvas"></div>
+    </section>
+    <div id="controls"></div>
+    <section>
+      <p>Here you can get randomly generated flowers and save them by pressing 'S'</p>
+    </section>
+    <section>
+      <p>Care to get a flower generated based on your face
+        or learn more about this project? Check out the 
+        <a href="your_flower.html">Your_flower</a> page.</p>
+    </section>
   </main>
 </body>
 

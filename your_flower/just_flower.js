@@ -9,6 +9,7 @@ const size = 800;
 
 let flower;
 let kind = 0;
+const kindStrings = ["Rose", "Daisy", "Maurer"];
 let moodSlider;
 let flowerKindButton;
 
@@ -19,17 +20,18 @@ function setup() {
     colorMode(HSB, 360, 100, 100, 100);
     noStroke();
 
-    flowerKindButton = createButton('kind: ' + kind).mousePressed(() => {
+    flowerKindButton = createButton('kind: ' + kindStrings[kind]).mousePressed(() => {
         kind = (kind + 1) % 3;
         genNewFlower();
-        flowerKindButton.elt.firstChild.nodeValue = 'kind: ' + kind;
-    });
+        flowerKindButton.elt.firstChild.nodeValue = 'kind: ' + kindStrings[kind];
+    }).parent('controls');
 
-    createButton('Anotha one').mousePressed(() => {
+    let cb = createButton('Anotha!').mousePressed(() => {
         genNewFlower();
-    })
+    }).parent('controls');
 
     moodSlider = createSlider(0, 1, 0.3, 0.05);
+    moodSlider.parent('controls');
 
     genNewFlower();
 

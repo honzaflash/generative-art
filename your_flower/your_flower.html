@@ -4,45 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="Pattern_Clock" content="width=device-width, initial-scale=1.0">
-  <title>Your Flower</title>
-  <style>
-    body {
-      margin: 0px;
-      padding: 0px;
-      display: block;
-      justify-content: center;
+  <title>Your_Flower</title>
+    
+  <link href="allstyle.css" rel="stylesheet">
 
-      font-family: Calibri, 'Gill Sans', 'Trebuchet MS', sans-serif;
-      background: rgb(54, 65, 89);
-    }
-    header {
-      margin: 0px;
-      padding: 0px;
-      display: flex;
-      justify-content: center;
-
-      font-size: 40px;
-      font-weight: bold;
-      font-stretch: expanded;
-      color:rgb(107, 118, 143);
-    }
-    h3 {
-      margin: 0px;
-      padding: 0px;
-      display: flex;
-      justify-content: center;
-
-      color: rgb(107, 118, 143);
-      font-weight: lighter;
-    }
-    div {
-      margin: 0px;
-      padding: 0px;
-      display: flex;
-      justify-content: center;
-    }
-
-  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/clmtrackr@1.1.2/build/clmtrackr.min.js"></script>
   <script src="faceplusplus_form.js"></script>
@@ -52,10 +17,101 @@
 
 <body>
   <main>
-    <header>Your Flower</header>
-    <div id="flower_canvas">
-    </div>
-    <h3>personalized flower just for you ❤</h3>
+    <header>Your_Flower</header>
+    <section>
+      <div id="flower_canvas" class="canvas-container"></div>
+    </section>
+    <h2>personalized flower just for you ❤</h2>
+    <section class="hover-expand" id="more-flowers">
+      <div class="expand-visible">
+        <p>Wanna see more flowers?</p>
+        <a href="#more-flowers" class="expand-button">&or;</a>
+        <a href="#" class="collapse-button">&and;</a>
+      </div>
+      <div class="expand-hidden">
+        <p>Then go check out the <a href="just_flower.html">Just_Flower</a>
+          which requires none of that face tracking stuff - you don't need
+          a webcam, everything is generated randomly + it's without a delay :)</p>
+      </div>
+    </section>
+    <section class="extra-padding-bottom">
+      <h3>Controls</h3>
+      <p>
+        If mood is toggled on, raising your eyebrows will lighten the flower up.
+        <table>
+          <tr>
+            <th>s</th><th>save the current frame</th>
+          </tr>
+          <tr>
+            <th>g</th><th>Generate new flower</th>
+          </tr>
+          <tr>
+            <th>m</th><th>Toggle real time interaction (mood)</th>
+          </tr>
+          <tr>
+            <th>t</th><th>Toggle camera/tracking display</th>
+          </tr>
+        </table>
+      </p>
+    </section>
+    <section class="extra-padding-bottom">
+      <h3>About This Project</h3>
+      <p>
+        Your_Flower is inspired by the idea of gifting flowers.
+        Flowers can be beautiful but the real ones can also be expensive.
+        In this project I attempted to make a generator that takes an image
+        of you and presents a beautiful virtual abstract flower generated based on
+        your unique face features.
+      </p>
+      <p>
+        There is three main kinds of flowers you can get - Rose, Daisy and Maurer. 
+        <ul>
+          <li><b>Rose</b> is made up of layers of concentric closed curves
+            that are deformed based on Perlin noise.</li>
+          <li><b>Daisy</b> is made up of petals that are drawn around a circle.</li>
+          <li>And <b>Maurer</b> is plotted walk of a rose curve
+          (see <a href="https://en.wikipedia.org/wiki/Maurer_rose" target="_blank">Maurer Rose</a> on wikipedia).</li>
+        </ul>
+      </p>
+      <p>
+        After you press 'G' image from the webcam is sent to the
+        Face⁺⁺ API with a request for analysis. Received data is then
+        combined into three seeds that are then used in to determine
+        properties of flowers like color, jitter strength, counts of petals, etc.
+        In addition real-time tracking is used to interactively
+        manipulate the generated flower slightly based on eyeborw height. &MediumSpace; ( ͝סּ ͜ʖ͡סּ) &MediumSpace; ( •̀ ᴗ •́ )
+      </p>
+      <p>
+        The technologies I am using:
+        <ul>
+          <li><a href="https://p5js.org/" target="_blank">p5.js</a> 
+            - Creative coding library in JavaScript that makes drawing very easy.</li>
+          <li><a href="https://github.com/auduno/clmtrackr" target="_blank">clmtrackr</a> 
+            - Real-time tracking JavaScript library.</li>
+          <li><a href="https://www.faceplusplus.com/face-detection/" target="_blank">Face⁺⁺</a> 
+            - Facial recognition API, with detailed tracking information.</li>
+        </ul>
+      </p>
+      <p>
+        Shortcomings: Sadly the tracking technology is not as precise and consistent
+        to grant the same flower to a single person every time - which was
+        kind of the plan originally. This way at least you can get more different flowers
+        that you know are still generated based on <b>your</b> lovely face.
+      </p>
+    </section>
+    <section class="extra-padding-bottom">
+      <h3>About The Author</h3>
+      <p>
+        My name is Jan Rychlý and I love art, 
+        <a href="https://www.youtube.com/watch?v=aNCuZJe1zQk" target="_blank">Ultimate Firsbee</a>,
+        learning about computers and having them do work for me.&NewLine;
+        This was my final project for Generative Programming Art course at 
+        the great <a href="https://www.fi.muni.cz/" target="_blank">FI MUNI</a>.
+      </p>
+      <p>
+        Here is my <a href="https://github.com/honzaflash/generative-art">GitHub repo</a> with more generative art.
+      </p>
+    </section>
   </main>
 </body>
 
