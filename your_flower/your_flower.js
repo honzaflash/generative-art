@@ -1,5 +1,5 @@
 /*     ~~~ Your Flower ~~~
- * author: Jan Rychlý
+ * author: Jan Rychlý (https://www.github.com/honzaflash)
  * controlls: s ... save frame
  *            g ... generate flower
  *            t ... toggle webcam tracker 
@@ -8,7 +8,7 @@
  * https://www.notion.so/GDP-Final-Project-b452b25e336e4f348264c84f61137a7d
  */
 
-const size = 800;
+const size = 1000;
 
 let capture;
 let tracker;
@@ -127,7 +127,7 @@ function processFaceData({attributes, landmark}) {
                                     attributes.beauty.female_score * 19 +
                                     glasses * 31);
     
-    let kind = Math.floor(genderbeautyglasses / 700) % 3;
+    let kind = Math.floor(abs(genderbeautyglasses) / 700) % 3;
     let anchor = createVector(landmark.contour_chin.x, landmark.contour_chin.y);
     let l_cheek = createVector(landmark.contour_left4.x, landmark.contour_left4.y);
     let r_cheek = createVector(landmark.contour_right4.x, landmark.contour_right4.y);
@@ -146,7 +146,7 @@ function processFaceData({attributes, landmark}) {
     let seed0 = genderbeautyglasses * 11 + l_cheek.mag() * 41 + r_cheek.mag() * 41;
     let seed1 = attributes.age.value * 11 + attributes.skinstatus.health * 170 + l_eye.x * 19 + l_eye.y * 19;
     let seed2 = nose_l.mag() * 170 + nose_r.mag() * 170 + attributes.age.value * 19;
-    return {'kind': kind, 'seed0': seed0, 'seed1': seed1, 'seed2': seed2};
+    return {'kind': kind, 'seed0': abs(seed0), 'seed1': abs(seed1), 'seed2': abs(seed2)};
 }
 
 

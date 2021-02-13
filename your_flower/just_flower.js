@@ -5,11 +5,11 @@
  * project notes on notion:
  * https://www.notion.so/GDP-Final-Project-b452b25e336e4f348264c84f61137a7d
  */
-const size = 800;
+const size = 1000;
 
 let flower;
 let kind = 0;
-const kindStrings = ["Rose", "Daisy", "Maurer"];
+const kindStrings = ["Rose", "Maurer", "Daisy"];
 let moodSlider;
 let flowerKindButton;
 

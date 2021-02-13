@@ -232,7 +232,6 @@ class Daisy {
         seed2 = abs(seed2);
         this.petalWidth = 25 + Math.floor(seed2 % 20); // TODO lower petal count --> wider petals
         this.petalJagged = (seed2 % 10 < 5);
-        console.log(Math.floor((seed2 / 10) % 4) % 4);
         this.layerCount = [1, 4, 6][Math.floor((seed2 / 10) % 3) % 3];
         this.layers = [];
 
@@ -271,7 +270,6 @@ class Daisy {
                     (x) => {return map(x, 0, 1, 50, 90) + x * this.mood.value() * 10;}
                     ));
             }
-            // this.center = new Center(); TODO
         }
     }
 
