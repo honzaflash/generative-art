@@ -122,12 +122,12 @@ function processFaceData({attributes, landmark}) {
 
     let glasses = attributes.eyestatus.left_eye_status.no_glass_eye_close + attributes.eyestatus.left_eye_status.no_glass_eye_open < attributes.eyestatus.left_eye_status.normal_glass_eye_close + attributes.eyestatus.left_eye_status.normal_glass_eye_open;
     glasses = int(glasses) * 41 + int(attributes.eyestatus.left_eye_status.dark_glasses > 0.6) * 83;
-    const genderbeautyglasses = Math.floor(attributes.gender.value.charCodeAt(0) * 11 +
-                                    attributes.beauty.male_score * 17 +
-                                    attributes.beauty.female_score * 19 +
-                                    glasses * 31);
+    const genderbeautyglasses = attributes.gender.value.charCodeAt(0) * 41 +
+                                    Math.floor(attributes.beauty.male_score / 5) * 17 +
+                                    Math.floor(attributes.beauty.female_score / 5) * 19 +
+                                    + glasses * 31;
     
-    let kind = Math.floor(abs(genderbeautyglasses) / 700) % 3;
+    let kind = Math.floor(abs(genderbeautyglasses) / 1) % 3;
     let anchor = createVector(landmark.contour_chin.x, landmark.contour_chin.y);
     let l_cheek = createVector(landmark.contour_left4.x, landmark.contour_left4.y);
     let r_cheek = createVector(landmark.contour_right4.x, landmark.contour_right4.y);
