@@ -1,6 +1,12 @@
-
-// the flower grammar idea: 
-// https://www.notion.so/GDP-Final-Project-b452b25e336e4f348264c84f61137a7d#3b7f37c6320d4c06b59d93ba74f9bc80
+/*
+ * author: Jan Rychlý
+ * 
+ * Here are all the classes that take care of generating
+ * and drawing the flowers
+ * 
+ * project's repository:
+ * https://github.com/honzaflash/generative-art
+ */
 
 /**
  * Class representing a flower that can be drawn
@@ -93,7 +99,15 @@ class Rose {
     }
 }
 
-
+/**
+ * draw a closed curve made out of vertices spaced evenly
+ * around the circle distanced differently from the middle
+ * based on Perlin noise
+ * @param {Number} r - Base radius
+ * @param {Number} vertC - Number of vertices
+ * @param {Number} noiseRes - Noise resolution, best between 0.02 and 0.06
+ * @param {Number} jitterRange - Percentual range of jitter
+ */
 function wigglyCircle(r, vertC, noiseRes, jitterRange) {
     beginShape();
     // drawing 3 extra vertices to smoothly close up the curve
@@ -230,7 +244,7 @@ class Daisy {
         this.petalCount = Math.floor(seed1 % 16) + 7;
         this.petalLength = width * 0.35;
         seed2 = abs(seed2);
-        this.petalWidth = 25 + Math.floor(seed2 % 20); // TODO lower petal count --> wider petals
+        this.petalWidth = width * 0.031 + Math.floor(seed2 % Math.floor(width * 0.03)); // TODO lower petal count --> wider petals
         this.petalJagged = (seed2 % 10 < 5);
         this.layerCount = [1, 4, 6][Math.floor((seed2 / 10) % 3) % 3];
         this.layers = [];

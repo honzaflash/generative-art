@@ -4,8 +4,12 @@
  * 
  * project notes on notion:
  * https://www.notion.so/GDP-Final-Project-b452b25e336e4f348264c84f61137a7d
+ * project's repository:
+ * https://github.com/honzaflash/generative-art
+ * live hosting on GitHub Pages:
+ * https://honzaflash.github.io/generative-art/your_flower/your_flower.html
  */
-const size = 1000;
+const size = 900;
 
 let flower;
 let kind = 0;
